@@ -20,14 +20,16 @@ class MotorDifuso:
         return {nombre: float(fuzz.interp_membership(universo, mf, v))
                 for nombre, mf in mf_dict.items()}
 
-    def inferir(self, temp, tiempo, grosor):
+    def inferir(self, temp, tiempo, grosor, reglas=None):
+        if reglas is None:
+            reglas = self.reglas
         td  = self.fuzzificar(temp,   self.temp_mfs,  conjuntos.TEMP_U)
         tid = self.fuzzificar(tiempo, self.time_mfs,  conjuntos.TIME_U)
         thd = self.fuzzificar(grosor, self.thick_mfs, conjuntos.THICK_U)
 
         activaciones = {}
         resultados   = []
-        for (t, ti, th, salida) in self.reglas:
+        for (t, ti, th, salida) in reglas:
             act = min(td.get(t, 0), tid.get(ti, 0), thd.get(th, 0))
             resultados.append((t, ti, th, salida, act))
             activaciones[salida] = max(activaciones.get(salida, 0), act)
