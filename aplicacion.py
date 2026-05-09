@@ -11,7 +11,8 @@ from graficador import Graficador
 
 
 class FuzzyApp(tk.Tk):
-    """Ventana principal. Conecta MotorDifuso y Graficador."""
+    """Ventana unica: panel de controles a la izquierda,
+    graficas de membresia arriba e inferencia abajo a la derecha."""
 
     BG     = "#1e1e1e"
     PANEL  = "#2d2d2d"
@@ -35,8 +36,7 @@ class FuzzyApp(tk.Tk):
         self._spins      = {}
 
         self._construir_panel_izquierdo()
-        self._construir_notebook()
-        self._graficador.dibujar_matriz_reglas()
+        self._construir_area_graficas()
         self._calcular()
 
     # ── Panel izquierdo: entradas + resultado ─────────────────────────────────
@@ -45,27 +45,23 @@ class FuzzyApp(tk.Tk):
         panel.pack(side=tk.LEFT, fill=tk.Y, padx=(8, 4), pady=8)
         panel.pack_propagate(False)
 
-        # Titulo
         tk.Label(panel, text="Sistema Difuso",
                  bg=self.PANEL, fg=self.FG,
                  font=("Segoe UI", 12, "bold")).pack(pady=(14, 2))
         tk.Label(panel, text="Coccion de Carne de Res",
                  bg=self.PANEL, fg=self.FG2,
                  font=("Segoe UI", 8)).pack(pady=(0, 12))
-
         tk.Frame(panel, bg=self.BORDER, height=1).pack(fill=tk.X, padx=10)
 
-        # Entradas
         entradas = [
             ("temp",  "Temperatura del Horno (C):",  0,   300, 5,   200),
-            ("time",  "Tiempo de Coccion (min):",    0,   120, 5,    45),
-            ("thick", "Grosor de la Carne (cm):",    0.0, 6.0, 0.1,  2.5),
+            ("time",  "Tiempo de Coccion (min):",     0,   120, 5,    45),
+            ("thick", "Grosor de la Carne (cm):",     0.0, 6.0, 0.1,  2.5),
         ]
         for clave, etiqueta, lo, hi, paso, ini in entradas:
             tk.Label(panel, text=etiqueta,
                      bg=self.PANEL, fg=self.FG2,
                      font=("Segoe UI", 8)).pack(anchor="w", padx=14, pady=(10, 1))
-
             sp = tk.Spinbox(panel, from_=lo, to=hi, increment=paso,
                             width=10, font=("Segoe UI", 10),
                             bg="#3c3c3c", fg=self.FG,
@@ -81,7 +77,6 @@ class FuzzyApp(tk.Tk):
             sp.bind("<FocusOut>", lambda e: self._calcular())
             self._spins[clave] = sp
 
-        # Boton calcular
         tk.Frame(panel, bg=self.BORDER, height=1).pack(fill=tk.X, padx=10, pady=12)
 
         tk.Button(panel, text="Calcular",
@@ -91,14 +86,12 @@ class FuzzyApp(tk.Tk):
                   command=self._calcular).pack(padx=14, fill=tk.X)
 
         tk.Frame(panel, bg=self.BORDER, height=1).pack(fill=tk.X, padx=10, pady=10)
-
-        # Resultado
-        tk.Label(panel, text="Resultado:", bg=self.PANEL, fg=self.FG2,
+        tk.Label(panel, text="Resultado:",
+                 bg=self.PANEL, fg=self.FG2,
                  font=("Segoe UI", 8)).pack(anchor="w", padx=14)
 
-        self._res_box = tk.Frame(panel, bg="#8B0000", padx=10, pady=8)
+        self._res_box   = tk.Frame(panel, bg="#8B0000", padx=10, pady=8)
         self._res_box.pack(fill=tk.X, padx=14, pady=4)
-
         self._lbl_term  = tk.Label(self._res_box, text="—",
                                     bg="#8B0000", fg="white",
                                     font=("Segoe UI", 14, "bold"))
@@ -113,7 +106,6 @@ class FuzzyApp(tk.Tk):
                                     wraplength=220, justify=tk.CENTER)
         self._lbl_desc.pack(pady=(2, 0))
 
-        # Membresias activas
         tk.Frame(panel, bg=self.BORDER, height=1).pack(fill=tk.X, padx=10, pady=8)
         tk.Label(panel, text="Membresias activas:",
                  bg=self.PANEL, fg=self.FG2,
@@ -121,50 +113,35 @@ class FuzzyApp(tk.Tk):
         self._memb_box = tk.Frame(panel, bg=self.PANEL)
         self._memb_box.pack(fill=tk.X, padx=14, pady=2)
 
-    # ── Notebook con 3 pestanas ───────────────────────────────────────────────
-    def _construir_notebook(self):
-        sty = ttk.Style(self)
-        sty.theme_use("default")
-        sty.configure("D.TNotebook",
-                       background=self.BG, borderwidth=0, tabmargins=0)
-        sty.configure("D.TNotebook.Tab",
-                       background=self.PANEL, foreground=self.FG2,
-                       padding=[12, 6], font=("Segoe UI", 9))
-        sty.map("D.TNotebook.Tab",
-                background=[("selected", "#3a3a3a")],
-                foreground=[("selected", self.FG)])
+    # ── Area derecha: graficas en vista unica (arriba + abajo) ───────────────
+    def _construir_area_graficas(self):
+        area = tk.Frame(self, bg=self.BG)
+        area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(4, 8), pady=8)
 
-        nb = ttk.Notebook(self, style="D.TNotebook")
-        nb.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(4, 8), pady=8)
+        # Seccion superior — 4 funciones de membresia
+        marco_sup = tk.Frame(area, bg=self.BG)
+        marco_sup.pack(fill=tk.BOTH, expand=True)
 
-        def tab(nombre):
-            f = tk.Frame(nb, bg=self.BG)
-            nb.add(f, text=f"  {nombre}  ")
-            return f
-
-        t1 = tab("Funciones de Membresia")
         fig1  = Figure(facecolor=self.BG)
         axes1 = [fig1.add_subplot(2, 2, i + 1) for i in range(4)]
-        c1    = FigureCanvasTkAgg(fig1, master=t1)
+        c1    = FigureCanvasTkAgg(fig1, master=marco_sup)
         c1.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        t2 = tab("Matriz de Reglas")
-        fig2  = Figure(facecolor=self.BG)
-        axes2 = [fig2.add_subplot(2, 2, i + 1) for i in range(4)]
-        c2    = FigureCanvasTkAgg(fig2, master=t2)
+        # Separador visual
+        tk.Frame(area, bg=self.BORDER, height=1).pack(fill=tk.X, pady=2)
+
+        # Seccion inferior — salida defuzzificada
+        marco_inf = tk.Frame(area, bg=self.BG)
+        marco_inf.pack(fill=tk.BOTH, expand=True)
+
+        fig2 = Figure(facecolor=self.BG)
+        ax2  = fig2.add_subplot(1, 1, 1)
+        c2   = FigureCanvasTkAgg(fig2, master=marco_inf)
         c2.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        t3 = tab("Inferencia y Resultado")
-        fig3 = Figure(facecolor=self.BG)
-        ax3  = fig3.add_subplot(1, 1, 1)
-        c3   = FigureCanvasTkAgg(fig3, master=t3)
-        c3.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self._graficador = Graficador(fig1, axes1, c1, fig2, ax2, c2)
 
-        self._graficador = Graficador(fig1, axes1, c1,
-                                      fig2, axes2, c2,
-                                      fig3, ax3,   c3)
-
-    # ── Logica de actualizacion ───────────────────────────────────────────────
+    # ── Logica ────────────────────────────────────────────────────────────────
     def _leer_entradas(self):
         try:
             tv = float(self._spins["temp"].get())
@@ -172,9 +149,9 @@ class FuzzyApp(tk.Tk):
             th = float(self._spins["thick"].get())
         except ValueError:
             return None, None, None
-        tv = max(0.0,  min(300.0, round(tv / 5)   * 5.0))
-        ti = max(0.0,  min(120.0, round(ti / 5)   * 5.0))
-        th = max(0.0,  min(6.0,   round(th / 0.1) * 0.1))
+        tv = max(0.0, min(300.0, round(tv / 5)   * 5.0))
+        ti = max(0.0, min(120.0, round(ti / 5)   * 5.0))
+        th = max(0.0, min(6.0,   round(th / 0.1) * 0.1))
         return tv, ti, th
 
     def _calcular(self, event=None):
@@ -193,9 +170,9 @@ class FuzzyApp(tk.Tk):
 
         for w in self._memb_box.winfo_children():
             w.destroy()
-        for prefijo, degs, cols in [("T", td,  conjuntos.TEMP_COLORS),
+        for prefijo, degs, cols in [("T",  td,  conjuntos.TEMP_COLORS),
                                      ("Ti", tid, conjuntos.TIME_COLORS),
-                                     ("G", thd, conjuntos.THICK_COLORS)]:
+                                     ("G",  thd, conjuntos.THICK_COLORS)]:
             for (nom, deg), col in zip(degs.items(), cols):
                 if deg > 0.005:
                     tk.Label(self._memb_box,

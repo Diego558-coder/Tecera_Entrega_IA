@@ -1,26 +1,25 @@
 ﻿import numpy as np
-import matplotlib.patches as mpatches
-from matplotlib.colors import ListedColormap, BoundaryNorm
 import conjuntos
 
 
 class Graficador:
-    """Dibuja las tres vistas matplotlib dentro de la ventana:
-    funciones de membresia, matriz de reglas y salida defuzzificada."""
+    """Dibuja las dos secciones de la vista unica:
+    funciones de membresia (arriba) y salida defuzzificada (abajo)."""
 
-    BG     = "#0d1117"
-    SBG    = "#161b22"
-    FG     = "#e6edf3"
-    FG2    = "#8b949e"
-    BORDER = "#30363d"
-    ACCENT = "#58a6ff"
+    BG     = "#1e1e1e"
+    SBG    = "#2d2d2d"
+    FG     = "#f0f0f0"
+    FG2    = "#aaaaaa"
+    BORDER = "#444444"
+    ACCENT = "#4a90d9"
 
-    def __init__(self, fig1, axes1, canvas1,
-                 fig2, axes2, canvas2,
-                 fig3, ax3,   canvas3):
-        self.fig1    = fig1;  self.axes1   = axes1;  self.canvas1 = canvas1
-        self.fig2    = fig2;  self.axes2   = axes2;  self.canvas2 = canvas2
-        self.fig3    = fig3;  self.ax3     = ax3;    self.canvas3 = canvas3
+    def __init__(self, fig1, axes1, canvas1, fig2, ax2, canvas2):
+        self.fig1    = fig1
+        self.axes1   = axes1
+        self.canvas1 = canvas1
+        self.fig2    = fig2
+        self.ax2     = ax2
+        self.canvas2 = canvas2
 
     # ── Estilo oscuro comun ───────────────────────────────────────────────────
     def _estilo(self, ax, titulo, xlabel=""):
@@ -28,14 +27,14 @@ class Graficador:
         for sp in ax.spines.values():
             sp.set_color(self.BORDER)
         ax.tick_params(colors=self.FG2, labelsize=7)
-        ax.set_title(titulo, color=self.FG, fontsize=9, fontweight="bold", pad=5)
+        ax.set_title(titulo, color=self.FG, fontsize=8, fontweight="bold", pad=4)
         ax.set_ylabel("Membresia", color=self.FG2, fontsize=7)
         ax.set_ylim(-0.05, 1.18)
         ax.grid(True, alpha=0.14, color=self.BORDER)
         if xlabel:
             ax.set_xlabel(xlabel, color=self.FG2, fontsize=7)
 
-    # ── Tab 1: funciones de membresia (se actualiza con cada slider) ──────────
+    # ── Seccion superior: 4 funciones de membresia ───────────────────────────
     def dibujar_membresias(self, tv, ti, th, td, tid, thd):
         datos = [
             ("Temperatura (C)", conjuntos.TEMP_U,  conjuntos.TEMP_MFS,
@@ -59,18 +58,18 @@ class Graficador:
                     span = uni[-1] - uni[0]
                     for (nombre, deg), col in zip(degs.items(), cols):
                         if deg > 0.005:
-                            ax.plot(val, deg, "o", color=col, ms=6, zorder=6,
+                            ax.plot(val, deg, "o", color=col, ms=5, zorder=6,
                                     markeredgecolor="white", markeredgewidth=0.4)
                             ax.text(val + span * 0.02, deg + 0.05,
                                     f"{deg:.2f}", color=col, fontsize=6)
             ax.legend(loc="upper right", fontsize=6, facecolor=self.SBG,
                       labelcolor="#c9d1d9", edgecolor=self.BORDER, framealpha=0.85)
-        self.fig1.tight_layout(pad=1.6)
+        self.fig1.tight_layout(pad=1.2)
         self.canvas1.draw_idle()
 
-    # ── Tab 3: salida agregada + centroide (se actualiza con cada slider) ─────
+    # ── Seccion inferior: salida agregada + centroide ─────────────────────────
     def dibujar_salida(self, agregado, crisp, activaciones):
-        ax = self.ax3
+        ax = self.ax2
         ax.cla()
         self._estilo(ax, "Membresia Agregada  —  Defuzzificacion por Centroide",
                      xlabel="Termino de coccion (0-100)")
@@ -98,46 +97,5 @@ class Graficador:
         ax.legend(loc="upper right", fontsize=7, facecolor=self.SBG,
                   labelcolor="#c9d1d9", edgecolor=self.BORDER,
                   framealpha=0.9, ncol=2)
-        self.fig3.tight_layout(pad=1.5)
-        self.canvas3.draw_idle()
-
-    # ── Tab 2: matriz de reglas (solo se dibuja una vez al iniciar) ───────────
-    def dibujar_matriz_reglas(self):
-        TL = ["Baja", "Media", "Alta", "Muy Alta"]
-        IL = ["Poco", "Moderado", "Mucho", "Excesivo"]
-        GL = ["Delgada", "Normal", "Gruesa", "Muy Gruesa"]
-
-        t2n  = {t: i for i, t in enumerate(conjuntos.TERM_COLORS)}
-        rd   = {(t, ti, th): out for (t, ti, th, out) in conjuntos.RULES}
-        cmap = ListedColormap(list(conjuntos.TERM_COLORS.values()))
-        norm = BoundaryNorm(np.arange(-0.5, 6.5, 1), cmap.N)
-
-        self.fig2.suptitle("Matriz de Reglas  (Temperatura x Tiempo  por Grosor)",
-                            color=self.FG, fontsize=10, fontweight="bold")
-
-        for ax, grosor in zip(self.axes2, GL):
-            mat = np.array([[t2n[rd[(temp, tiempo, grosor)]] for temp in TL]
-                            for tiempo in IL], dtype=float)
-            ax.imshow(mat, cmap=cmap, norm=norm, aspect="auto")
-            ax.set_facecolor(self.SBG)
-            ax.set_xticks(range(len(TL)));  ax.set_xticklabels(TL, color="#c9d1d9", fontsize=8)
-            ax.set_yticks(range(len(IL)));  ax.set_yticklabels(IL, color="#c9d1d9", fontsize=8)
-            ax.set_title(f"Grosor: {grosor}", color=self.FG, fontweight="bold", fontsize=9)
-            ax.set_xlabel("Temperatura", color=self.FG2, fontsize=8)
-            ax.set_ylabel("Tiempo",      color=self.FG2, fontsize=8)
-            ax.tick_params(colors=self.FG2)
-            for i, tiempo in enumerate(IL):
-                for j, temp in enumerate(TL):
-                    etiq = rd[(temp, tiempo, grosor)]
-                    corta = etiq.replace("Tres Cuartos", "T.C").replace("Bien Cocido", "B.C")
-                    ax.text(j, i, corta, ha="center", va="center",
-                            color="white", fontsize=7.5, fontweight="bold")
-
-        parches = [mpatches.Patch(color=c, label=t)
-                   for t, c in conjuntos.TERM_COLORS.items()]
-        self.fig2.legend(handles=parches, loc="lower center", ncol=6,
-                         facecolor=self.SBG, labelcolor="#c9d1d9",
-                         edgecolor=self.BORDER, fontsize=8,
-                         bbox_to_anchor=(0.5, 0.01))
-        self.fig2.tight_layout(rect=[0, 0.07, 1, 0.95])
-        self.canvas2.draw()
+        self.fig2.tight_layout(pad=1.2)
+        self.canvas2.draw_idle()
