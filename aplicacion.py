@@ -99,15 +99,6 @@ class FuzzyApp(tk.Tk):
                  bg=PANEL, fg=FG,
                  font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT, padx=12, pady=8)
 
-        tk.Button(barra, text="Activar todas",
-                  bg="#2a5c2a", fg="white", font=("Segoe UI", 8),
-                  relief=tk.FLAT, padx=10, pady=3, cursor="hand2",
-                  command=lambda: self._toggle_todas(True)).pack(side=tk.RIGHT, padx=(4, 12), pady=6)
-        tk.Button(barra, text="Desactivar todas",
-                  bg="#5c2a2a", fg="white", font=("Segoe UI", 8),
-                  relief=tk.FLAT, padx=10, pady=3, cursor="hand2",
-                  command=lambda: self._toggle_todas(False)).pack(side=tk.RIGHT, padx=4, pady=6)
-
         header = tk.Frame(parent, bg="#252525")
         header.pack(fill=tk.X)
         for txt, w in [("   #", 5), ("Temperatura", 13), ("Tiempo", 11),

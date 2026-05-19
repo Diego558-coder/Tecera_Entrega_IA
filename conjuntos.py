@@ -89,72 +89,80 @@ THICK_COLORS = ["#AA77CC", "#CC44BB", "#BB5577", "#993399"]
 # ─────────────────────────────────────────────────────────────────────────────
 
 RULES = [
-    # Temperatura BAJA
+    # ── Temperatura BAJA (~80-140 C) ─────────────────────────────────────────
+    # Ref: low-and-slow 250F (121C) → Medium-Rare en 20-25 min (USDA / McGee)
+    # El calor suave penetra lento; tiempos cortos dejan el interior crudo.
     ("Baja",     "Poco",     "Delgada",    "Crudo"),
     ("Baja",     "Poco",     "Normal",     "Crudo"),
     ("Baja",     "Poco",     "Gruesa",     "Crudo"),
     ("Baja",     "Poco",     "Muy Gruesa", "Crudo"),
     ("Baja",     "Moderado", "Delgada",    "Azul"),
-    ("Baja",     "Moderado", "Normal",     "Crudo"),
+    ("Baja",     "Moderado", "Normal",     "Azul"),         # 25-55 min, 121C, 2.5cm → Rare
     ("Baja",     "Moderado", "Gruesa",     "Crudo"),
     ("Baja",     "Moderado", "Muy Gruesa", "Crudo"),
     ("Baja",     "Mucho",    "Delgada",    "Medio"),
     ("Baja",     "Mucho",    "Normal",     "Azul"),
-    ("Baja",     "Mucho",    "Gruesa",     "Crudo"),
+    ("Baja",     "Mucho",    "Gruesa",     "Azul"),         # 55-90 min, 121C, 3.8cm → algo de coccion
     ("Baja",     "Mucho",    "Muy Gruesa", "Crudo"),
     ("Baja",     "Excesivo", "Delgada",    "Tres Cuartos"),
-    ("Baja",     "Excesivo", "Normal",     "Medio"),
-    ("Baja",     "Excesivo", "Gruesa",     "Azul"),
-    ("Baja",     "Excesivo", "Muy Gruesa", "Crudo"),
-    # Temperatura MEDIA
+    ("Baja",     "Excesivo", "Normal",     "Tres Cuartos"), # 90+ min, 121C, 2.5cm → Med-Well
+    ("Baja",     "Excesivo", "Gruesa",     "Medio"),        # 90+ min, 121C, 3.8cm → Medium
+    ("Baja",     "Excesivo", "Muy Gruesa", "Azul"),         # 90+ min, 121C, 5cm → algo de coccion
+
+    # ── Temperatura MEDIA (~150-220 C) ────────────────────────────────────────
+    # Horno estandar. Tiempos moderados → terminos medios segun grosor.
     ("Media",    "Poco",     "Delgada",    "Azul"),
     ("Media",    "Poco",     "Normal",     "Crudo"),
     ("Media",    "Poco",     "Gruesa",     "Crudo"),
     ("Media",    "Poco",     "Muy Gruesa", "Crudo"),
     ("Media",    "Moderado", "Delgada",    "Medio"),
-    ("Media",    "Moderado", "Normal",     "Azul"),
-    ("Media",    "Moderado", "Gruesa",     "Crudo"),
+    ("Media",    "Moderado", "Normal",     "Medio"),        # 25-55 min, 165C, 2.5cm → Medium
+    ("Media",    "Moderado", "Gruesa",     "Azul"),         # 25-55 min, 165C, 3.8cm → Rare
     ("Media",    "Moderado", "Muy Gruesa", "Crudo"),
     ("Media",    "Mucho",    "Delgada",    "Tres Cuartos"),
-    ("Media",    "Mucho",    "Normal",     "Medio"),
-    ("Media",    "Mucho",    "Gruesa",     "Azul"),
-    ("Media",    "Mucho",    "Muy Gruesa", "Crudo"),
-    ("Media",    "Excesivo", "Delgada",    "Bien Cocido"),
-    ("Media",    "Excesivo", "Normal",     "Tres Cuartos"),
-    ("Media",    "Excesivo", "Gruesa",     "Medio"),
-    ("Media",    "Excesivo", "Muy Gruesa", "Azul"),
-    # Temperatura ALTA
-    ("Alta",     "Poco",     "Delgada",    "Medio"),
-    ("Alta",     "Poco",     "Normal",     "Azul"),
+    ("Media",    "Mucho",    "Normal",     "Tres Cuartos"), # 55-90 min, 165C, 2.5cm → Med-Well
+    ("Media",    "Mucho",    "Gruesa",     "Medio"),        # 55-90 min, 165C, 3.8cm → Medium
+    ("Media",    "Mucho",    "Muy Gruesa", "Azul"),         # 55-90 min, 165C, 5cm → Rare
+    ("Media",    "Excesivo", "Delgada",    "Quemado"),      # 90+ min, 165C, delgada → quemada
+    ("Media",    "Excesivo", "Normal",     "Bien Cocido"),  # 90+ min, 165C, 2.5cm → Well Done
+    ("Media",    "Excesivo", "Gruesa",     "Tres Cuartos"), # 90+ min, 165C, 3.8cm → Med-Well
+    ("Media",    "Excesivo", "Muy Gruesa", "Medio"),        # 90+ min, 165C, 5cm → Medium
+
+    # ── Temperatura ALTA (~180-270 C / 425F) ──────────────────────────────────
+    # Ref: oven bake 425F → 1" (2.5cm): Rare 5-7min, Medium 11-13min, MedWell 13-15min
+    ("Alta",     "Poco",     "Delgada",    "Medio"),        # 5-20 min, 218C, <2cm → Medium
+    ("Alta",     "Poco",     "Normal",     "Azul"),         # 5-10 min, 218C, 2.5cm → Rare/MedRare
     ("Alta",     "Poco",     "Gruesa",     "Crudo"),
     ("Alta",     "Poco",     "Muy Gruesa", "Crudo"),
-    ("Alta",     "Moderado", "Delgada",    "Tres Cuartos"),
-    ("Alta",     "Moderado", "Normal",     "Medio"),
-    ("Alta",     "Moderado", "Gruesa",     "Azul"),
-    ("Alta",     "Moderado", "Muy Gruesa", "Crudo"),
-    ("Alta",     "Mucho",    "Delgada",    "Bien Cocido"),
-    ("Alta",     "Mucho",    "Normal",     "Tres Cuartos"),
-    ("Alta",     "Mucho",    "Gruesa",     "Medio"),
-    ("Alta",     "Mucho",    "Muy Gruesa", "Azul"),
+    ("Alta",     "Moderado", "Delgada",    "Bien Cocido"),  # 25-55 min, 218C, delgada → Well Done
+    ("Alta",     "Moderado", "Normal",     "Tres Cuartos"), # 25-55 min, 218C, 2.5cm → Med-Well
+    ("Alta",     "Moderado", "Gruesa",     "Medio"),        # 25-55 min, 218C, 3.8cm → Medium
+    ("Alta",     "Moderado", "Muy Gruesa", "Azul"),         # 25-55 min, 218C, 5cm → Rare
+    ("Alta",     "Mucho",    "Delgada",    "Quemado"),      # 55+ min, 218C, delgada → quemada
+    ("Alta",     "Mucho",    "Normal",     "Quemado"),      # 55+ min, 218C, 2.5cm → quemado
+    ("Alta",     "Mucho",    "Gruesa",     "Bien Cocido"),  # 55+ min, 218C, 3.8cm → Well Done
+    ("Alta",     "Mucho",    "Muy Gruesa", "Tres Cuartos"), # 55+ min, 218C, 5cm → Med-Well
     ("Alta",     "Excesivo", "Delgada",    "Quemado"),
-    ("Alta",     "Excesivo", "Normal",     "Bien Cocido"),
-    ("Alta",     "Excesivo", "Gruesa",     "Tres Cuartos"),
-    ("Alta",     "Excesivo", "Muy Gruesa", "Medio"),
-    # Temperatura MUY ALTA
-    ("Muy Alta", "Poco",     "Delgada",    "Tres Cuartos"),
+    ("Alta",     "Excesivo", "Normal",     "Quemado"),      # 90+ min, 218C, 2.5cm → quemado
+    ("Alta",     "Excesivo", "Gruesa",     "Quemado"),      # 90+ min, 218C, 3.8cm → quemado
+    ("Alta",     "Excesivo", "Muy Gruesa", "Bien Cocido"),  # 90+ min, 218C, 5cm → Well Done
+
+    # ── Temperatura MUY ALTA (~240-300 C) ─────────────────────────────────────
+    # Calor muy agresivo: lo que Alta hace en Moderado, Muy Alta lo hace en Poco.
+    ("Muy Alta", "Poco",     "Delgada",    "Bien Cocido"),  # alta T + delgada → Well Done rapido
     ("Muy Alta", "Poco",     "Normal",     "Medio"),
     ("Muy Alta", "Poco",     "Gruesa",     "Azul"),
     ("Muy Alta", "Poco",     "Muy Gruesa", "Crudo"),
-    ("Muy Alta", "Moderado", "Delgada",    "Bien Cocido"),
-    ("Muy Alta", "Moderado", "Normal",     "Tres Cuartos"),
-    ("Muy Alta", "Moderado", "Gruesa",     "Medio"),
-    ("Muy Alta", "Moderado", "Muy Gruesa", "Azul"),
+    ("Muy Alta", "Moderado", "Delgada",    "Quemado"),      # 25+ min a 270C, delgada → quemado
+    ("Muy Alta", "Moderado", "Normal",     "Quemado"),      # 25+ min a 270C, 2.5cm → quemado
+    ("Muy Alta", "Moderado", "Gruesa",     "Bien Cocido"),  # 25+ min a 270C, 3.8cm → Well Done
+    ("Muy Alta", "Moderado", "Muy Gruesa", "Tres Cuartos"), # 25+ min a 270C, 5cm → Med-Well
     ("Muy Alta", "Mucho",    "Delgada",    "Quemado"),
-    ("Muy Alta", "Mucho",    "Normal",     "Bien Cocido"),
-    ("Muy Alta", "Mucho",    "Gruesa",     "Tres Cuartos"),
-    ("Muy Alta", "Mucho",    "Muy Gruesa", "Medio"),
+    ("Muy Alta", "Mucho",    "Normal",     "Quemado"),      # 55+ min a 270C, 2.5cm → quemado
+    ("Muy Alta", "Mucho",    "Gruesa",     "Quemado"),      # 55+ min a 270C, 3.8cm → quemado
+    ("Muy Alta", "Mucho",    "Muy Gruesa", "Bien Cocido"),  # 55+ min a 270C, 5cm → Well Done
     ("Muy Alta", "Excesivo", "Delgada",    "Quemado"),
     ("Muy Alta", "Excesivo", "Normal",     "Quemado"),
-    ("Muy Alta", "Excesivo", "Gruesa",     "Bien Cocido"),
-    ("Muy Alta", "Excesivo", "Muy Gruesa", "Tres Cuartos"),
+    ("Muy Alta", "Excesivo", "Gruesa",     "Quemado"),      # 90+ min a 270C → quemado
+    ("Muy Alta", "Excesivo", "Muy Gruesa", "Quemado"),      # 90+ min a 270C → quemado
 ]
