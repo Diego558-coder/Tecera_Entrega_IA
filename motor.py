@@ -96,15 +96,15 @@ def inferir(temp, tiempo, grosor, reglas=None):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def interpretar(crisp):
-    if crisp < 12:
+    if crisp < 49:
         return "Crudo",        "#8B0000", "Temperatura interna muy baja. No apta para consumo."
-    elif crisp < 28:
-        return "Azul",         "#D22B2B", "Interior casi crudo, muy rojo. ~49-55 C internos."
-    elif crisp < 50:
-        return "Medio",        "#E8503A", "Centro rosado y jugoso. ~60-66 C internos."
-    elif crisp < 67:
-        return "Tres Cuartos", "#C47840", "Ligeramente rosado al centro. ~66-72 C internos."
-    elif crisp < 85:
-        return "Bien Cocido",  "#8B4513", "Completamente cocida, sin rosa. ~77-82 C internos."
+    elif crisp < 57:
+        return "Azul",         "#D22B2B", "Interior casi crudo, muy rojo. (Rare: 49-57 °C)"
+    elif crisp < 63:
+        return "Medio",        "#E8503A", "Centro rosado y jugoso. (Medium: 57-63 °C)"
+    elif crisp < 68:
+        return "Tres Cuartos", "#C47840", "Ligeramente rosado al centro. (Medium Well: 63-68 °C)"
+    elif crisp < 78:
+        return "Bien Cocido",  "#8B4513", "Completamente cocida, sin rosa. (Well Done: 68-78 °C)"
     else:
-        return "Quemado",      "#1A0800", "Exceso de coccion. Carne carbonizada."
+        return "Quemado",      "#1A0800", "Exceso de coccion. Carne carbonizada. (> 78 °C)"

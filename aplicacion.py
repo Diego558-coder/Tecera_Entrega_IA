@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import conjuntos
 import motor
+import motor_sugeno
 import graficador
 
 BG     = "#1e1e1e"
@@ -47,7 +48,7 @@ class FuzzyApp(tk.Tk):
         self._calcular()
 
     # ─────────────────────────────────────────────────────────────────────────
-    # PESTAÑAS — Membresías, Inferencia y Reglas
+    # PESTAÑAS — Membresías, Inferencia, Reglas y Comparación
     # ─────────────────────────────────────────────────────────────────────────
 
     def _construir_area_pestanas(self):
@@ -172,6 +173,10 @@ class FuzzyApp(tk.Tk):
             lbl_act.bind("<MouseWheel>", scroll_rueda)
             self._rule_act_labels.append(lbl_act)
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # PESTAÑA COMPARACIÓN MAMDANI vs SUGENO
+    # ─────────────────────────────────────────────────────────────────────────
+
     def _toggle_todas(self, estado):
         for var in self._rule_vars:
             var.set(estado)
@@ -193,6 +198,7 @@ class FuzzyApp(tk.Tk):
         reglas_activas = [r for r, v in zip(conjuntos.RULES, self._rule_vars) if v.get()]
 
         td, tid, thd, acts, _, agregado, crisp = motor.inferir(tv, ti, th, reglas_activas)
+        _, _, _, _, crisp_s = motor_sugeno.inferir_sugeno(tv, ti, th, reglas_activas)
 
         for i, (t, ti_r, th_r, _) in enumerate(conjuntos.RULES):
             act       = min(td.get(t, 0), tid.get(ti_r, 0), thd.get(th_r, 0))
@@ -209,7 +215,7 @@ class FuzzyApp(tk.Tk):
 
         graficador.dibujar_membresias(
             self._fig1, self._axes1, self._canvas1,
-            tv, ti, th, td, tid, thd, crisp)
+            tv, ti, th, td, tid, thd, crisp, crisp_s)
         graficador.dibujar_salida(
             self._fig2, self._ax2, self._canvas2,
             agregado, crisp, acts)

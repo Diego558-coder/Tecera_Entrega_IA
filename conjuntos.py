@@ -10,42 +10,42 @@ import skfuzzy as fuzz
 TEMP_U  = np.arange(0, 301, 1)      # Temperatura del horno: 0 a 300 °C
 TIME_U  = np.arange(0, 121, 1)      # Tiempo de cocción: 0 a 120 minutos
 THICK_U = np.linspace(0, 6, 300)    # Grosor de la carne: 0 a 6 cm
-TERM_U  = np.arange(0, 101, 1)      # Término de cocción (salida): 0 a 100
+TERM_U  = np.arange(40, 101, 1)     # Temperatura interna de la carne: 40 a 100 °C
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FUNCIONES DE MEMBRESÍA — ENTRADAS
 #
-# Usamos funciones trapezoidales (trapmf) definidas por 4 puntos [a, b, c, d]:
-#   - De 0 a 'a': membresía = 0
-#   - De 'a' a 'b': sube de 0 a 1
-#   - De 'b' a 'c': membresía = 1 (parte plana)
-#   - De 'c' a 'd': baja de 1 a 0
-#   - De 'd' en adelante: membresía = 0
-# Los extremos comparten valores iguales para "abrir" el trapecio hacia afuera.
+# Combinación de dos tipos de funciones según posición del conjunto:
+#   trapmf [a,b,c,d] — trapezoidal, para conjuntos extremos (abiertos en un lado).
+#   trimf  [a,b,c]   — triangular, para conjuntos intermedios (pico único en b).
+#
+# Esta combinación permite modelar con mayor precisión los conjuntos centrales
+# (que tienen un valor más representativo) y mantener la apertura lateral en
+# los extremos del universo de discurso.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Conjuntos para la temperatura del horno (°C)
 TEMP_MFS = {
-    "Baja":     fuzz.trapmf(TEMP_U, [0,   0,   80,  140]),
-    "Media":    fuzz.trapmf(TEMP_U, [100, 150, 180, 220]),
-    "Alta":     fuzz.trapmf(TEMP_U, [180, 210, 240, 270]),
-    "Muy Alta": fuzz.trapmf(TEMP_U, [240, 265, 300, 300]),
+    "Baja":     fuzz.trapmf(TEMP_U, [0,   0,   80,  140]),   # trapmf: abierto a la izquierda
+    "Media":    fuzz.trimf( TEMP_U, [100, 160, 220]),          # trimf: pico en 160 °C
+    "Alta":     fuzz.trimf( TEMP_U, [180, 225, 270]),          # trimf: pico en 225 °C
+    "Muy Alta": fuzz.trapmf(TEMP_U, [240, 265, 300, 300]),    # trapmf: abierto a la derecha
 }
 
 # Conjuntos para el tiempo de cocción (minutos)
 TIME_MFS = {
-    "Poco":     fuzz.trapmf(TIME_U, [0,   0,   20,  40]),
-    "Moderado": fuzz.trapmf(TIME_U, [25,  40,  55,  70]),
-    "Mucho":    fuzz.trapmf(TIME_U, [55,  70,  85,  100]),
-    "Excesivo": fuzz.trapmf(TIME_U, [85,  100, 120, 120]),
+    "Poco":     fuzz.trapmf(TIME_U, [0,   0,   20,  40]),    # trapmf: abierto a la izquierda
+    "Moderado": fuzz.trimf( TIME_U, [25,  47,  70]),           # trimf: pico en 47 min
+    "Mucho":    fuzz.trimf( TIME_U, [55,  77,  100]),          # trimf: pico en 77 min
+    "Excesivo": fuzz.trapmf(TIME_U, [85,  100, 120, 120]),    # trapmf: abierto a la derecha
 }
 
 # Conjuntos para el grosor de la carne (cm)
 THICK_MFS = {
-    "Delgada":    fuzz.trapmf(THICK_U, [0.0, 0.0, 1.0, 2.0]),
-    "Normal":     fuzz.trapmf(THICK_U, [1.5, 2.0, 2.8, 3.5]),
-    "Gruesa":     fuzz.trapmf(THICK_U, [3.0, 3.5, 4.5, 5.0]),
-    "Muy Gruesa": fuzz.trapmf(THICK_U, [4.5, 5.0, 6.0, 6.0]),
+    "Delgada":    fuzz.trapmf(THICK_U, [0.0, 0.0, 1.0, 2.0]),  # trapmf: abierto a la izquierda
+    "Normal":     fuzz.trimf( THICK_U, [1.5, 2.5, 3.5]),         # trimf: pico en 2.5 cm
+    "Gruesa":     fuzz.trimf( THICK_U, [3.0, 4.0, 5.0]),         # trimf: pico en 4.0 cm
+    "Muy Gruesa": fuzz.trapmf(THICK_U, [4.5, 5.0, 6.0, 6.0]),  # trapmf: abierto a la derecha
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,12 +56,12 @@ THICK_MFS = {
 # ─────────────────────────────────────────────────────────────────────────────
 
 TERM_MFS = {
-    "Crudo":        fuzz.trapmf(TERM_U, [0,  0,  8,  15]),
-    "Azul":         fuzz.trapmf(TERM_U, [10, 18, 25, 32]),
-    "Medio":        fuzz.trapmf(TERM_U, [28, 38, 48, 58]),
-    "Tres Cuartos": fuzz.trapmf(TERM_U, [50, 58, 65, 73]),
-    "Bien Cocido":  fuzz.trapmf(TERM_U, [68, 75, 82, 88]),
-    "Quemado":      fuzz.trapmf(TERM_U, [83, 90, 100, 100]),
+    "Crudo":        fuzz.trapmf(TERM_U, [40, 40, 46, 52]),   # < 49 °C: cruda, no apta
+    "Azul":         fuzz.trimf( TERM_U, [48, 52, 58]),        # 49-57 °C: Rare
+    "Medio":        fuzz.trimf( TERM_U, [54, 60, 66]),        # 57-63 °C: Medium
+    "Tres Cuartos": fuzz.trimf( TERM_U, [62, 65, 70]),        # 63-68 °C: Medium Well
+    "Bien Cocido":  fuzz.trimf( TERM_U, [67, 71, 78]),        # 68-75 °C: Well Done
+    "Quemado":      fuzz.trapmf(TERM_U, [75, 82, 100, 100]),  # > 75 °C: quemada
 }
 
 # Colores para graficar cada conjunto de la salida
@@ -166,3 +166,20 @@ RULES = [
     ("Muy Alta", "Excesivo", "Gruesa",     "Quemado"),      # 90+ min a 270C → quemado
     ("Muy Alta", "Excesivo", "Muy Gruesa", "Quemado"),      # 90+ min a 270C → quemado
 ]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CONSTANTES SUGENO (orden cero)
+#
+# En Sugeno cada término de salida se reemplaza por una constante numérica k.
+# Usamos el centro del intervalo plano de cada trapmf de TERM_MFS como valor
+# representativo: k = (b + c) / 2, donde [a,b,c,d] son los parámetros del trapecio.
+# ─────────────────────────────────────────────────────────────────────────────
+
+SUGENO_CONSTANTS = {
+    "Crudo":        43,  # centro del tope plano [40, 46] = 43 °C
+    "Azul":         52,  # pico de trimf [48, 52, 58]     = 52 °C
+    "Medio":        60,  # pico de trimf [54, 60, 66]     = 60 °C
+    "Tres Cuartos": 65,  # pico de trimf [62, 65, 70]     = 65 °C
+    "Bien Cocido":  71,  # pico de trimf [67, 71, 78]     = 71 °C
+    "Quemado":      88,  # centro del tope plano [82,100] = 88 °C (aprox)
+}
